@@ -1,8 +1,9 @@
 {
   "name": "infinitystore",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React hook for managing a state storage without limits",
-  "main": "dist/InfinityStore.cjs.js",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
   "files": [
     "dist"
   ],

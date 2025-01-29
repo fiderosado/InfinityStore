@@ -1,4 +1,8 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var react = require('react');
 
 function _arrayLikeToArray(r, a) {
   (null == a || a > r.length) && (a = r.length);
@@ -125,7 +129,7 @@ var InfinityStore = function InfinityStore(name, initialStore) {
    *
    * @type {[Object, function]}
    */
-  var _useState = useState(_objectSpread2(_objectSpread2({}, initialStore), storedState)),
+  var _useState = react.useState(_objectSpread2(_objectSpread2({}, initialStore), storedState)),
     _useState2 = _slicedToArray(_useState, 2),
     states = _useState2[0],
     setStates = _useState2[1];
@@ -134,24 +138,24 @@ var InfinityStore = function InfinityStore(name, initialStore) {
    *
    * @type {Object}
    */
-  var stateRef = useRef(states);
+  var stateRef = react.useRef(states);
   /**
    * React ref for the BroadcastChannel.
    *
    * @type {Object}
    */
-  var channelRef = useRef(null);
+  var channelRef = react.useRef(null);
   /**
    * React ref for the state proxy.
    *
    * @type {Object}
    */
-  var stateProxy = useRef(null);
+  var stateProxy = react.useRef(null);
   /***
    * stateManager is a function that allows you to manage the state
    * @type {function(*): {set: function(*, *): void, get: function(): *, value: *}}
    */
-  var stateManager = useCallback(function (key) {
+  var stateManager = react.useCallback(function (key) {
     /***
      * set is a function that allows you to update the state
      * @param valueOrUpdater
@@ -223,7 +227,7 @@ var InfinityStore = function InfinityStore(name, initialStore) {
    * storeResponse is a function that allows you to get the current
    * @type {(function(*): (unknown))|*}
    */
-  var storeResponse = useCallback(function (keys) {
+  var storeResponse = react.useCallback(function (keys) {
     /***
      * keys is a function that allows you to get the current state
      */
@@ -256,7 +260,7 @@ var InfinityStore = function InfinityStore(name, initialStore) {
    * @param {string} name - The name used as the key in localStorage and BroadcastChannel.
    * @param {function} setStates - Function to update the state.
    */
-  useEffect(function () {
+  react.useEffect(function () {
     /**
      * Handles changes in localStorage and updates the state.
      *
@@ -287,11 +291,11 @@ var InfinityStore = function InfinityStore(name, initialStore) {
       (_channelRef$current2 = channelRef.current) === null || _channelRef$current2 === void 0 || _channelRef$current2.close();
     };
   }, [name]);
-  useEffect(function () {
+  react.useEffect(function () {
     stateRef.current = states;
     localStorage.setItem(name, JSON.stringify(states));
   }, [name, states]);
-  useEffect(function () {
+  react.useEffect(function () {
   }, []);
   return {
     state: stateProxy.current,
@@ -299,5 +303,5 @@ var InfinityStore = function InfinityStore(name, initialStore) {
   };
 };
 
-export { InfinityStore as default };
-//# sourceMappingURL=InfinityStore.esm.js.map
+exports["default"] = InfinityStore;
+//# sourceMappingURL=index.js.map

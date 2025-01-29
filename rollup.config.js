@@ -7,6 +7,20 @@ export default {
   input: 'src/InfinityStore.js',
   output: [
     {
+      file: pkg.main,
+      format: 'cjs',
+      exports: 'named',
+      sourcemap: true,
+    },
+    {
+      file: pkg.module,
+      format: 'es',
+      exports: 'named',
+      sourcemap: true,
+    },
+  ],
+  /*output: [
+    {
       file: 'dist/InfinityStore.cjs.js',  // Ruta directa para CommonJS
       format: 'cjs',
       exports: 'named',
@@ -18,7 +32,7 @@ export default {
       exports: 'named',
       sourcemap: true,
     },
-  ],
+  ],*/
   plugins: [
     resolve(),
     commonjs(),
