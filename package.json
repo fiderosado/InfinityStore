@@ -1,0 +1,61 @@
+{
+  "name": "infinitystore",
+  "version": "1.0.0",
+  "description": "A React hook for managing a state storage without limits",
+  "main": "dist/InfinityStore.cjs.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "react",
+    "hook",
+    "state",
+    "management",
+    "state-management",
+    "useState",
+    "redux",
+    "MobX",
+    "Recoil",
+    "Zustand",
+    "Valtio",
+    "global",
+    "storage",
+    "synchronization"
+  ],
+  "author": "Fidel Remedios Rosado",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fiderosado/InfinityStore.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fiderosado/InfinityStore/issues"
+  },
+  "homepage": "https://github.com/fiderosado/InfinityStore#readme",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-react": "^7.14.5",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "jsdom": "^25.0.1",
+    "rollup": "^2.56.3",
+    "standard": "^17.1.2",
+    "vitest": "^2.1.8"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/standard/eslintrc.json"
+  },
+  "dependencies": {
+    "react": "^19.0.0"
+  }
+}
