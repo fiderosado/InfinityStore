@@ -1,61 +1,30 @@
 {
   "name": "infinitystore",
-  "version": "1.0.0",
-  "description": "A React hook for managing a state storage without limits",
-  "main": "dist/InfinityStore.cjs.js",
-  "files": [
-    "dist"
-  ],
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "build": "rollup -c",
-    "prepublishOnly": "npm run build",
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
-  },
-  "keywords": [
-    "react",
-    "hook",
-    "state",
-    "management",
-    "state-management",
-    "useState",
-    "redux",
-    "MobX",
-    "Recoil",
-    "Zustand",
-    "Valtio",
-    "global",
-    "storage",
-    "synchronization"
-  ],
-  "author": "Fidel Remedios Rosado",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fiderosado/InfinityStore.git"
-  },
-  "bugs": {
-    "url": "https://github.com/fiderosado/InfinityStore/issues"
-  },
-  "homepage": "https://github.com/fiderosado/InfinityStore#readme",
-  "license": "MIT",
-  "devDependencies": {
-    "@babel/core": "^7.15.0",
-    "@babel/preset-env": "^7.15.0",
-    "@babel/preset-react": "^7.14.5",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^20.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.4",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
-    "jsdom": "^25.0.1",
-    "rollup": "^2.56.3",
-    "standard": "^17.1.2",
-    "vitest": "^2.1.8"
-  },
-  "eslintConfig": {
-    "extends": "./node_modules/standard/eslintrc.json"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "react": "^19.0.0"
+    "@headlessui/react": "^2.0.3",
+    "@headlessui/tailwindcss": "^0.2.1",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "next": "15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "yarn": "^1.22.22"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.6",
+    "postcss": "^8",
+    "prettier": "^3.3.2",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "tailwindcss": "^3.4.1"
   }
 }
