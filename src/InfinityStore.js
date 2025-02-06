@@ -1,3 +1,4 @@
+"use client"
 import { useEffect , useState , useRef , useCallback } from "react";
 
 /***
@@ -19,13 +20,19 @@ const InfinityStore = (
    *
    * @type {Object}
    */
-  const storedState = JSON.parse(localStorage.getItem(name) || "{}");
+  function getInitialState(){
+    if ( typeof window !== "undefined" ){
+      const storedState = JSON.parse(localStorage.getItem(name) || "{}");
+      return { ...initialStore , ...storedState };
+    }
+    return initialStore;
+  }
   /**
    * React state hook that combines the initial state with the stored state.
    *
    * @type {[Object, function]}
    */
-  const [states , setStates] = useState({ ...initialStore , ...storedState });
+  const [states , setStates] = useState(getInitialState());
   /**
    * React ref to store the current state.
    *
@@ -157,39 +164,43 @@ const InfinityStore = (
    * @param {function} setStates - Function to update the state.
    */
   useEffect(() => {
-    /**
-     * Handles changes in localStorage and updates the state.
-     *
-     * @param {StorageEvent} event - The storage event that triggers the state update.
-     */
-    const handleStorageChange = (event) => {
-      if ( event.key === name && event.newValue ){
-        const newState = JSON.parse(event.newValue);
-        setStates(newState);
-      }
-    };
-    /**
-     * Handles messages from the BroadcastChannel and updates the state.
-     *
-     * @param {MessageEvent} event - The message event that triggers the state update.
-     */
-    const handleChannelMessage = (event) => {
-      if ( event.data.type === "stateChange" ){
-        setStates(event.data.state);
-      }
-    };
-    window.addEventListener("storage" , handleStorageChange);
-    channelRef.current = new BroadcastChannel(name);
-    channelRef.current.addEventListener("message" , handleChannelMessage);
-    return () => {
-      window.removeEventListener("storage" , handleStorageChange);
-      channelRef.current?.close();
-    };
+    if ( typeof window !== "undefined" ) {
+      /**
+       * Handles changes in localStorage and updates the state.
+       *
+       * @param {StorageEvent} event - The storage event that triggers the state update.
+       */
+      const handleStorageChange = (event) => {
+        if (event.key === name && event.newValue) {
+          const newState = JSON.parse(event.newValue);
+          setStates(newState);
+        }
+      };
+      /**
+       * Handles messages from the BroadcastChannel and updates the state.
+       *
+       * @param {MessageEvent} event - The message event that triggers the state update.
+       */
+      const handleChannelMessage = (event) => {
+        if (event.data.type === "stateChange") {
+          setStates(event.data.state);
+        }
+      };
+      window.addEventListener("storage", handleStorageChange);
+      channelRef.current = new BroadcastChannel(name);
+      channelRef.current.addEventListener("message", handleChannelMessage);
+      return () => {
+        window.removeEventListener("storage", handleStorageChange);
+        channelRef.current?.close();
+      };
+    }
   } , [name]);
 
   useEffect(() => {
-    stateRef.current = states;
-    localStorage.setItem(name , JSON.stringify(states));
+    if ( typeof window !== "undefined" ) {
+      stateRef.current = states;
+      localStorage.setItem(name, JSON.stringify(states));
+    }
   } , [name , states]);
 
   useEffect(() => {
