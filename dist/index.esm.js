@@ -119,13 +119,19 @@ var InfinityStore = function InfinityStore(name, initialStore) {
    *
    * @type {Object}
    */
-  var storedState = JSON.parse(localStorage.getItem(name) || "{}");
+  function getInitialState() {
+    if (typeof window !== "undefined") {
+      var storedState = JSON.parse(localStorage.getItem(name) || "{}");
+      return _objectSpread2(_objectSpread2({}, initialStore), storedState);
+    }
+    return initialStore;
+  }
   /**
    * React state hook that combines the initial state with the stored state.
    *
    * @type {[Object, function]}
    */
-  var _useState = useState(_objectSpread2(_objectSpread2({}, initialStore), storedState)),
+  var _useState = useState(getInitialState()),
     _useState2 = _slicedToArray(_useState, 2),
     states = _useState2[0],
     setStates = _useState2[1];
@@ -257,39 +263,43 @@ var InfinityStore = function InfinityStore(name, initialStore) {
    * @param {function} setStates - Function to update the state.
    */
   useEffect(function () {
-    /**
-     * Handles changes in localStorage and updates the state.
-     *
-     * @param {StorageEvent} event - The storage event that triggers the state update.
-     */
-    var handleStorageChange = function handleStorageChange(event) {
-      if (event.key === name && event.newValue) {
-        var newState = JSON.parse(event.newValue);
-        setStates(newState);
-      }
-    };
-    /**
-     * Handles messages from the BroadcastChannel and updates the state.
-     *
-     * @param {MessageEvent} event - The message event that triggers the state update.
-     */
-    var handleChannelMessage = function handleChannelMessage(event) {
-      if (event.data.type === "stateChange") {
-        setStates(event.data.state);
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    channelRef.current = new BroadcastChannel(name);
-    channelRef.current.addEventListener("message", handleChannelMessage);
-    return function () {
-      var _channelRef$current2;
-      window.removeEventListener("storage", handleStorageChange);
-      (_channelRef$current2 = channelRef.current) === null || _channelRef$current2 === void 0 || _channelRef$current2.close();
-    };
+    if (typeof window !== "undefined") {
+      /**
+       * Handles changes in localStorage and updates the state.
+       *
+       * @param {StorageEvent} event - The storage event that triggers the state update.
+       */
+      var handleStorageChange = function handleStorageChange(event) {
+        if (event.key === name && event.newValue) {
+          var newState = JSON.parse(event.newValue);
+          setStates(newState);
+        }
+      };
+      /**
+       * Handles messages from the BroadcastChannel and updates the state.
+       *
+       * @param {MessageEvent} event - The message event that triggers the state update.
+       */
+      var handleChannelMessage = function handleChannelMessage(event) {
+        if (event.data.type === "stateChange") {
+          setStates(event.data.state);
+        }
+      };
+      window.addEventListener("storage", handleStorageChange);
+      channelRef.current = new BroadcastChannel(name);
+      channelRef.current.addEventListener("message", handleChannelMessage);
+      return function () {
+        var _channelRef$current2;
+        window.removeEventListener("storage", handleStorageChange);
+        (_channelRef$current2 = channelRef.current) === null || _channelRef$current2 === void 0 || _channelRef$current2.close();
+      };
+    }
   }, [name]);
   useEffect(function () {
-    stateRef.current = states;
-    localStorage.setItem(name, JSON.stringify(states));
+    if (typeof window !== "undefined") {
+      stateRef.current = states;
+      localStorage.setItem(name, JSON.stringify(states));
+    }
   }, [name, states]);
   useEffect(function () {
   }, []);
