@@ -1,4 +1,4 @@
-```markdown
+
 # InfinityStore
 
 InfinityStore es un hook de React que permite gestionar múltiples estados en un solo hook, almacenando el estado sin límites.
@@ -10,31 +10,122 @@ Para instalar las dependencias, ejecuta:
 ```bash
 npm install
 ```
+```bash
+yarn add infinitystore
+```
 
 ## Uso
 
-A continuación se muestra un ejemplo de cómo usar el hook `InfinityStore`:
+A continuación se muestra un ejemplo de cómo usar el hook `InfinityStore`
+
+### Creando el Store
 
 ```javascript
-import React from 'react';
-import InfinityStore from './InfinityStore';
 
-const App = () => {
-  const { state, store } = InfinityStore('appState', { count: 0 });
+"use client";
+import InfinityStore from "infinitystore";
 
-  const increment = () => {
-    state.count.set(prevCount => prevCount + 1);
-  };
+const Store = () => InfinityStore(
+  "market" ,
+  { cart: [] } ,
+  (store) => ({
+    add: (item) => {
+      const existingItem = store.cart().find((i) => i.id === item.id);
+      if ( existingItem ){
+        store.cart.set((prevCart) => {
+          return prevCart.map((i) => i.id === item.id ? { ...i , quantity: i.quantity + item.quantity } : i);
+        });
+      } else {
+        store.cart.set((prevCart) => ([...prevCart , { ...item }]));
+      }
+    } ,
+    removeAll: () => {
+      store.cart.set([]);
+    } ,
+    remove: (id) => {
+      store.cart.set((prevCart) => {
+        return prevCart.filter((item) => item.id !== id);
+      });
+    } ,
+    increment: (id , quantity = 1) => {
+      const existingItem = store.cart().find((item) => item.id === id);
+      if ( existingItem ){
+        store.cart.set((prevCart) => {
+          return prevCart.map((item) =>
+            item.id === id ? { ...item , quantity: item.quantity + quantity } : item
+          );
+        });
+      }
+    } ,
+    decrement: (id , quantity = 1) => {
+      const existingItem = store.cart().find((item) => item.id === id);
+      if ( existingItem ){
+        const newQuantity = existingItem.quantity - quantity;
+        if ( newQuantity <= 0 ){
+          store.cart.set((prevCart) => {
+            return prevCart.filter((item) => item.id !== id);
+          });
+        } else {
+          store.cart.set((prevCart) => {
+            return prevCart.map((item) => item.id === id ? { ...item , quantity: newQuantity } : item);
+          });
+        }
+      }
+    }
+  })
+);
 
+export default Store;
+
+```
+### Uso en el componente
+```javascript
+
+export default function Component({ className }) {
+
+  const { store , state } = Store();
+
+  const addCart = (box) => store.cart.add(box);
+  const clearCart = () => store.cart.removeAll();
+  const cartPlus = (id , quantity ) => store.cart.increment(id , stepQuantity);
+  const cartMinus = (id) => store.cart.decrement(id);
+  const deleteOnCart = (id) => store.cart.remove(id);
+
+  useEffect(() => {
+    console.log("El estado del carrito ha cambiado:", state());
+  }, [state()]);
+  
+  const boxProduct ={ 
+    id: 1,
+    quantity: 1 ,
+    product : {
+      name: "Product 1",
+      price : 23
+    }
+  }
+  
   return (
     <div>
-      <h1>Count: {state.count()}</h1>
-      <button onClick={increment}>Increment</button>
+      <h1>Añadir Producto</h1>
+      <button onClick={() => addCart(boxProduct)}>Agregar al carrito</button>
+      <h1>Lista de Productos</h1>
+      <ul>
+          {
+            (state().cart ?? []).map((item , index) => (
+              <li key={item.id}>
+                <span>{item.product.name} - ${item.product.price}</span>
+                <button onClick={() => cartPlus(item.product.id, 1)}>+</button>
+                <button onClick={() => cartMinus(item.product.id)}>-</button>
+                <button onClick={() => deleteOnCart(item.product.id)}>Eliminar</button>
+              </li>
+            ))
+          }
+      </ul>
+      <button onClick={clearCart}>Vaciar carrito</button>
     </div>
-  );
-};
-
-export default App;
+  )
+  
+}
 ```
 
 ## API
@@ -42,7 +133,7 @@ export default App;
 ### InfinityStore
 
 ```javascript
-InfinityStore(name, initialStore, callback)
+const Store = () => InfinityStore( name, initialStore , callback )
 ```
 
 - `name` (string): El nombre utilizado como clave en `localStorage` y `BroadcastChannel`.
@@ -51,15 +142,13 @@ InfinityStore(name, initialStore, callback)
 
 #### Retorna
 
-- `state` (object): Un proxy que permite acceder y actualizar el estado.
-- `store` (function): Una función que permite obtener el estado actual.
+- `store` (object): Un proxy que permite acceder y actualizar el estado.
+- `state` (function): Una función que permite obtener el estado actual.
 
 ## Scripts
 
 - `build`: Construye el proyecto usando Rollup.
-- `prepublishOnly`: Ejecuta el script de construcción antes de publicar.
-- `test`: Ejecuta las pruebas usando Vitest.
-- `coverage`: Ejecuta las pruebas y genera un informe de cobertura.
+- `npx vitest`: Ejecuta las pruebas usando Vitest.
 
 ## Licencia
 

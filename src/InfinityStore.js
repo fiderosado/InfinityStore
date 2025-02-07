@@ -6,14 +6,15 @@ import { useEffect , useState , useRef , useCallback } from "react";
  * @param name
  * @param initialStore
  * @param callback
- * @returns {{state: null, store: ((function(*): (unknown))|*)}|(function(): *)|((function(): {handler: string}) & {get: (function(): boolean), put: put})}
+ * @returns {{state: {}, store: ((function(*): *)|*)}}
  * @constructor
  */
 const InfinityStore = (
-  name ,
-  initialStore ,
+  name ='InfinityStore' ,
+  initialStore = {} ,
   callback = () => ({})
 ) => {
+  let loading = false;
   /**
    * Retrieves the stored state from localStorage using the provided name.
    * If no stored state is found, returns an empty object.
@@ -63,25 +64,27 @@ const InfinityStore = (
        * @param callback
        */
       const set = (valueOrUpdater , callback) => {
-        setStates((prev) => {
+        !loading && setStates((prev) => {
+          loading = true;
           const currentValue = prev[key];
           let newValue;
+
           if ( typeof valueOrUpdater === "function" ){
             newValue = valueOrUpdater(currentValue);
           } else if (
-            typeof currentValue === "object" &&
-            currentValue !== null &&
-            typeof valueOrUpdater === "object" &&
-            valueOrUpdater !== null &&
-            !Array.isArray(valueOrUpdater)
+            typeof currentValue === "object" && currentValue !== null && typeof valueOrUpdater === "object" && valueOrUpdater !== null && !Array.isArray(valueOrUpdater)
           ){
             newValue = { ...currentValue , ...valueOrUpdater };
           } else {
             newValue = valueOrUpdater;
           }
+          console.log("setttt--->" , { prev , newValue , valueOrUpdater });
           const updatedState = { ...prev , [key]: newValue };
-          if ( callback ) callback(updatedState[key]);
+          if ( callback ){
+            callback(updatedState[key]);
+          }
           channelRef.current?.postMessage({ type: "stateChange" , state: updatedState });
+          loading = false;
           return updatedState;
         });
       };
@@ -94,11 +97,7 @@ const InfinityStore = (
     [states]
   );
 
-  if ( !stateProxy.current ){
-    /***
-     * stateProxy is a function that allows you to manage the state
-     * @type {{}}
-     */
+  const refresh = () => {
     stateProxy.current = new Proxy(
       {} ,
       {
@@ -118,6 +117,13 @@ const InfinityStore = (
         }
       }
     );
+  };
+  /***
+   * stateProxy is a function that allows you to manage the state
+   * @type {{}}
+   */
+  if ( !stateProxy.current ){
+    refresh();
   }
 
   /***
@@ -195,14 +201,12 @@ const InfinityStore = (
       };
     }
   } , [name]);
-
   useEffect(() => {
     if ( typeof window !== "undefined" ) {
       stateRef.current = states;
       localStorage.setItem(name, JSON.stringify(states));
     }
   } , [name , states]);
-
   useEffect(() => {
     const syncState = (event) => {
       if ( event.key === name ){
@@ -211,10 +215,9 @@ const InfinityStore = (
       }
     };
   } , []);
-
   return {
-    state: stateProxy.current ,
-    store: storeResponse
+    store : stateProxy.current ,
+    state : storeResponse
   };
 };
 
