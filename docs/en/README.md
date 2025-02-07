@@ -1,80 +1,128 @@
-Here is the `README.md` file for the `InfinityStore` hook, including usage code:
-
-
 # InfinityStore
 
-InfinityStore is a React hook that allows you to manage multiple states in a single hook, storing the state without limits.
+InfinityStore is a React hook that allows managing multiple states in a single hook, storing the state without limits.
 
 ## Installation
-### 1. Install from npm
 
-First, install the package from npm:
+To install dependencies, run:
 
 ```bash
-npm install infinitystore
+npm install
 ```
-## Usage
-This example shows the use of InfinityStore to manage a shopping cart.
-In the first step we will create a Store to initialize an instance, declare custom functions to manage the state.
-The state is available in the localStorage and will be synchronized with the BroadcastChannel.
+```bash
+yarn add infinitystore
+```
 
-### Store.js
+## Usage
+
+Below is an example of how to use the `InfinityStore` hook.
+
+### Creating the Store
+
 ```javascript
-// store.js
-import InfinityStore from './InfinityStore';
-/***
- * InfinityStore is a powerful hook that allows you to manage multiple states in a single React hook for managing a state storage without limits
- * @param name {string} name used as key in localStorage and BroadcastChannel
- * @param initialStore {object} initial state
- * @param callback {function} function executed when accessing a state
- * @returns {{state: null, store: ((function(*): (unknown))|*)}|(function(): *)|((function(): {handler: string}) & {get: (function(): boolean), put: put})}
- * @constructor
- */
-const Instance = () => InfinityStore(
-  "store-cart-market" , 
+"use client";
+import InfinityStore from "infinitystore";
+
+const Store = () => InfinityStore(
+  "market" ,
   { cart: [] } ,
-  (state) => ({
-    /* function to add an item to the cart */
+  (store) => ({
     add: (item) => {
-      state.cart.set((prevCart) => [...prevCart , item]);
+      const existingItem = store.cart().find((i) => i.id === item.id);
+      if ( existingItem ){
+        store.cart.set((prevCart) => {
+          return prevCart.map((i) => i.id === item.id ? { ...i , quantity: i.quantity + item.quantity } : i);
+        });
+      } else {
+        store.cart.set((prevCart) => ([...prevCart , { ...item }]));
+      }
     } ,
-    /* function to remove an item from the cart */
+    removeAll: () => {
+      store.cart.set([]);
+    } ,
     remove: (id) => {
-      state.cart.set((prevCart) => prevCart.filter((item) => item.id !== id));
+      store.cart.set((prevCart) => {
+        return prevCart.filter((item) => item.id !== id);
+      });
+    } ,
+    increment: (id , quantity = 1) => {
+      const existingItem = store.cart().find((item) => item.id === id);
+      if ( existingItem ){
+        store.cart.set((prevCart) => {
+          return prevCart.map((item) =>
+            item.id === id ? { ...item , quantity: item.quantity + quantity } : item
+          );
+        });
+      }
+    } ,
+    decrement: (id , quantity = 1) => {
+      const existingItem = store.cart().find((item) => item.id === id);
+      if ( existingItem ){
+        const newQuantity = existingItem.quantity - quantity;
+        if ( newQuantity <= 0 ){
+          store.cart.set((prevCart) => {
+            return prevCart.filter((item) => item.id !== id);
+          });
+        } else {
+          store.cart.set((prevCart) => {
+            return prevCart.map((item) => item.id === id ? { ...item , quantity: newQuantity } : item);
+          });
+        }
+      }
     }
   })
 );
 
+export default Store;
 ```
-### 2. Import the store
-### CartExample.js
+
+### Using in a Component
+
 ```javascript
-// We import the store
-import Instance from './store';
-/***
- * We must call the state , then the store object,
- * and then use the available functions
- */
-const CartExample = () => {
-  const { state , store } = Instance();
-    return (
-        <div>
-        <h1>Carrito de compras</h1>
-        <ul>
-          {/* we print the cart items */}
-            {store().cart.map((item) => (
-            <li key={item.id}>
-                {item.name} - ${item.price}
-                <button onClick={() => state.cart.remove(item.id)}>Eliminar</button>
-            </li>
-            ))}
-        </ul>
-          {/* we add new items to the cart */}
-        <button onClick={() => state.cart.add({ id: Date.now() , name: "Producto" , price: 100 })}>Agregar producto</button>
-        </div>
-    );
-};
+export default function Component({ className }) {
+
+  const { store , state } = Store();
+
+  const addCart = (box) => store.cart.add(box);
+  const clearCart = () => store.cart.removeAll();
+  const cartPlus = (id , quantity ) => store.cart.increment(id , stepQuantity);
+  const cartMinus = (id) => store.cart.decrement(id);
+  const deleteOnCart = (id) => store.cart.remove(id);
+
+  useEffect(() => {
+    console.log("Cart state has changed:", state());
+  }, [state()]);
   
+  const boxProduct ={
+    id: 1,
+    quantity: 1 ,
+    product : {
+      name: "Product 1",
+      price : 23
+    }
+  }
+  
+  return (
+    <div>
+      <h1>Add Product</h1>
+      <button onClick={() => addCart(boxProduct)}>Add to Cart</button>
+      <h1>Product List</h1>
+      <ul>
+          {
+            (state().cart ?? []).map((item , index) => (
+              <li key={item.id}>
+                <span>{item.product.name} - ${item.product.price}</span>
+                <button onClick={() => cartPlus(item.product.id, 1)}>+</button>
+                <button onClick={() => cartMinus(item.product.id)}>-</button>
+                <button onClick={() => deleteOnCart(item.product.id)}>Remove</button>
+              </li>
+            ))
+          }
+      </ul>
+      <button onClick={clearCart}>Clear Cart</button>
+    </div>
+  )
+}
 ```
 
 ## API
@@ -82,26 +130,24 @@ const CartExample = () => {
 ### InfinityStore
 
 ```javascript
-InfinityStore(name, initialStore, callback)
+const Store = () => InfinityStore( name, initialStore , callback )
 ```
 
-- `name` (string): The name used as the key in `localStorage` and `BroadcastChannel`.
+- `name` (string): The name used as a key in `localStorage` and `BroadcastChannel`.
 - `initialStore` (object): The initial state.
-- `callback` (function): An optional function that is executed when accessing a state.
+- `callback` (function): An optional function executed when accessing a state.
 
 #### Returns
 
-- `state` (object): A proxy that allows accessing and updating the state.
-- `store` (function): A function that allows obtaining the current state.
+- `store` (object): A proxy that allows accessing and updating the state.
+- `state` (function): A function that retrieves the current state.
 
 ## Scripts
 
 - `build`: Builds the project using Rollup.
-- `prepublishOnly`: Runs the build script before publishing.
-- `test`: Runs tests using Vitest.
-- `coverage`: Runs tests and generates a coverage report.
+- `npx vitest`: Runs tests using Vitest.
 
 ## License
 
 This project is licensed under the MIT License.
-```
+
