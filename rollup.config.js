@@ -19,20 +19,6 @@ export default {
       sourcemap: true,
     },
   ],
-  /*output: [
-    {
-      file: 'dist/InfinityStore.cjs.js',  // Ruta directa para CommonJS
-      format: 'cjs',
-      exports: 'named',
-      sourcemap: true,
-    },
-    {
-      file: 'dist/InfinityStore.esm.js',  // Ruta directa para ES Modules
-      format: 'es',
-      exports: 'named',
-      sourcemap: true,
-    },
-  ],*/
   plugins: [
     resolve(),
     commonjs(),
